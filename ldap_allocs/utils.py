@@ -19,7 +19,7 @@ def get_group_name(allocation_obj):
     return ldap_group_name
 
 
-def remove_from_expired_allocation(allocation_pk):
+def remove_from_allocation(allocation_pk):
     allocation_obj = get_object_or_404(Allocation, pk=allocation_pk)
     ldap_group_name = get_group_name(allocation_obj)
     if ldap_group_name is None:

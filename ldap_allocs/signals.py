@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 def alloc_remove_user(sender, **kwargs):
     allocation_user_id = kwargs.get("allocation_user_pk")
     allocation_user = get_object_or_404(AllocationUser, pk=allocation_user_id)
-    # logger.debug(allocation_user.user.username)
     allocation_obj = allocation_user.allocation
     if allocation_obj.status.name != "Active":
         return
@@ -34,7 +33,6 @@ def alloc_remove_user(sender, **kwargs):
 def alloc_activate_user(sender, **kwargs):
     allocation_user_id = kwargs.get("allocation_user_pk")
     allocation_user = get_object_or_404(AllocationUser, pk=allocation_user_id)
-    # logger.debug(allocation_user.user.username)
     allocation_obj = allocation_user.allocation
     if allocation_obj.status.name != "Active":
         return
@@ -45,7 +43,6 @@ def alloc_activate_user(sender, **kwargs):
 
     ldap_sam = LDAPModify()
     ldap_sam.add_user_to_group(ldap_group_name, allocation_user.user.username)
-    # allocation_activate.send(sender=None, allocation_pk=allocation_obj.pk)
 
 
 # @receiver(allocation_disable)
