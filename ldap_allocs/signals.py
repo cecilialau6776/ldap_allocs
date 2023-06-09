@@ -3,15 +3,14 @@ import logging
 from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 
+from coldfront.core.allocation.models import Allocation, AllocationUser
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_activate_user,
     allocation_remove_user,
 )
-from coldfront.core.allocation.models import Allocation, AllocationUser
 
-# from coldfront.core.resource.models import *
-from coldfront.plugins.ldap_allocs.utils import LDAPModify, get_group_name
+from coldfront.plugin.ldap_allocs.utils import LDAPModify, get_group_name
 
 logger = logging.getLogger(__name__)
 
