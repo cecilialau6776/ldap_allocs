@@ -10,7 +10,7 @@ from coldfront.core.allocation.signals import (
     allocation_remove_user,
 )
 
-from coldfront.plugin.ldap_allocs.utils import LDAPModify, get_group_name
+from coldfront_plugin_ldap_allocs.utils import LDAPModify, get_group_name
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +71,7 @@ def alloc_activate(sender, **kwargs):
 
     ldap_sam = LDAPModify()
     groups = ldap_sam.search_a_group(ldap_group_name, objectClass="groups")
-    # logger.debug(f"Groups: {groups}")
     if len(groups) == 0:
-        # create group
         ldap_sam.create_group(
             ldap_group_name, "posixGroup", {"gidNumber": allocation_id}
         )
@@ -81,6 +79,3 @@ def alloc_activate(sender, **kwargs):
     if len(groups) == 0:
         logger.critical(f"Failed to create group {ldap_group_name}")
         return
-    # for user in allocation_obj.project.projectuser_set.filter(status__name="Active"):
-    #     ldap_sam.add_user_to_group(ldap_group_name, user.user.username)
-    # logger.debug(f"Groups: {groups}")
