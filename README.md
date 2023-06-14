@@ -28,6 +28,9 @@ Additionally, set the following options as applicable for your LDAP server:
 | `LDAP_ALLOCS_PRIV_KEY_FILE` | `""` | Path to the private key file |
 | `LDAP_ALLOCS_CERT_FILE` | `""` | Path to the certificate file |
 | `LDAP_ALLOCS_CACERT_FILE` | `""` | Path to the CA certificate file |
+| `LDAP_ALLOCS_GID_MIN` | `65565` | Lower gid range for LDAP `posixGroup`s, inclusive |
+| `LDAP_ALLOCS_GID_MIN` | `4294967295` | Upper gid range for LDAP `posixGroup`s, inclusive |
+| `LDAP_ALLOCS_PREFIX` | `""` | A string added to the beginning of LDAP group names. For example, if the prefix is `"cf-"` and the resource's `ldap-group-name` is `"storage"`, the `cn` might look something like `cn=cf-storage-project_name-42` |
 
 This plugin also provides a `remove_from_allocation` function that will remove users from an allocation. This can be in ColdFront's `ALLOCATION_FUNCS_ON_EXPIRE` setting.
 

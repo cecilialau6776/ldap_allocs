@@ -131,7 +131,7 @@ class LDAPModify:
         logger.debug(f"Create group response: {self.conn.result}")
 
     def get_next_gid(self):
-        gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
+        gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 65565)
         gid_max = import_from_settings("LDAP_ALLOCS_GID_MAX", 2**32 - 1)
         filter = ldap.filter.filter_format(
             "(cn=%s*)",
