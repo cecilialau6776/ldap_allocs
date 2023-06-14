@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
+from coldfront.core.utils.common import import_from_settings
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_activate_user,
@@ -26,6 +27,7 @@ def alloc_remove_user(sender, **kwargs):
     if ldap_group_name is None:
         return
     ldap_sam = LDAPModify()
+    logger.debug(f"next_gid {ldap_sam.get_next_gid()}")
     ldap_sam.remove_user_from_group(ldap_group_name, allocation_user.user.username)
 
 
@@ -42,6 +44,7 @@ def alloc_activate_user(sender, **kwargs):
         return
 
     ldap_sam = LDAPModify()
+    logger.debug(ldap_sam.get_next_gid())
     ldap_sam.add_user_to_group(ldap_group_name, allocation_user.user.username)
 
 
@@ -72,8 +75,18 @@ def alloc_activate(sender, **kwargs):
     ldap_sam = LDAPModify()
     groups = ldap_sam.search_a_group(ldap_group_name, objectClass="groups")
     if len(groups) == 0:
+        # Check gid is within range
+        gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
+        gid_max = import_from_settings("LDAP_ALLOCS_GID_MAX", 2**32 - 1)
+        gid = gid_min + allocation_id
+        if gid > gid_max:
+            gid = LDAPModify().get_next_gid()
+            if gid is None:
+                logger.critical("No more gids available in range")
         ldap_sam.create_group(
-            ldap_group_name, "posixGroup", {"gidNumber": allocation_id}
+            ldap_group_name,
+            "posixGroup",
+            {"gidNumber": gid},
         )
     groups = ldap_sam.search_a_group(ldap_group_name, objectClass="groups")
     if len(groups) == 0:

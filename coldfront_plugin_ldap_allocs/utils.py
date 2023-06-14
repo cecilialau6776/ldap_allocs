@@ -15,7 +15,7 @@ def get_group_name(allocation_obj):
     ldap_group_name = allocation_obj.resources.all()[0].get_attribute("ldap-group-name")
     if ldap_group_name is None:
         return None
-    ldap_group_name += f"${allocation_obj.project.pk}"
+    ldap_group_name = f"{import_from_settings('LDAP_ALLOCS_PREFIX', '')}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
     return ldap_group_name
 
 
@@ -129,3 +129,23 @@ class LDAPModify:
         self.conn_ldif.add(**add_params)
         self.conn.add(**add_params)
         logger.debug(f"Create group response: {self.conn.result}")
+
+    def get_next_gid(self):
+        gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
+        gid_max = import_from_settings("LDAP_ALLOCS_GID_MAX", 2**32 - 1)
+        filter = ldap.filter.filter_format(
+            "(cn=%s*)",
+            [import_from_settings("LDAP_ALLOCS_PREFIX", "")],
+        )
+        search_base = f"ou=groups,{self.LDAP_BASE_DN}"
+        searchParameters = {
+            "search_base": search_base,
+            "search_filter": filter,
+            "attributes": "gidNumber",
+        }
+        self.conn.search(**searchParameters)
+        gid_list = [entry["gidNumber"] for entry in self.conn.entries]
+        try:
+            return next((gid for gid in range(gid_min, gid_max + 1) if gid not in gid_list))
+        except StopIteration:
+            return None
