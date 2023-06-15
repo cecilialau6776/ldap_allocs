@@ -32,13 +32,14 @@ Additionally, set the following options as applicable for your LDAP server:
 | `LDAP_ALLOCS_GID_MAX` | `4294967295` | Upper gid range for LDAP `posixGroup`s, inclusive |
 | `LDAP_ALLOCS_PREFIX` | `""` | A string added to the beginning of LDAP group names. For example, if the prefix is `"cf-"` and the resource's `ldap-group-name` is `"storage"`, the `cn` might look something like `cn=cf-storage-project_name-42` |
 
-This plugin also provides a `remove_from_allocation` function that will remove users from an allocation. This can be in ColdFront's `ALLOCATION_FUNCS_ON_EXPIRE` setting.
+This plugin also provides a `remove_from_allocation` function that will remove users from an allocation. This can be in ColdFront's `ALLOCATION_FUNCS_ON_EXPIRE` setting to remove users from allocations when they expire.
 
 `ALLOCATION_FUNCS_ON_EXPIRE += ['coldfront_plugin_ldap_allocs.utils.remove_from_allocation',]`
 
 Here are a couple of example configurations:
 
-```
+```py
+# /etc/coldfront/local_settings.py
 ALLOCATION_FUNCS_ON_EXPIRE += ['coldfront_plugin_ldap_allocs.utils.remove_from_allocation',]
 LDAP_ALLOCS_SERVER_URI = ldaps://tls.example.com
 LDAP_ALLOCS_BASE = "dc=tls,dc=example,dc=com"
@@ -49,7 +50,8 @@ LDAP_ALLOCS_CERT_FILE = /path/to/cert
 LDAP_ALLOCS_PRIV_KEY_FILE = /path/to/key
 ```
 
-```
+```py
+# /etc/coldfront/local_settings.py
 LDAP_ALLOCS_SERVER_URI = ldap://example.com
 LDAP_ALLOCS_BASE = "dc=example,dc=com"
 LDAP_ALLOCS_BIND_DN = "cn=Manager,dc=example,dc=com"
