@@ -16,6 +16,7 @@ def get_group_name(allocation_obj):
     if ldap_group_name is None:
         return None
     ldap_group_name = f"{import_from_settings('LDAP_ALLOCS_PREFIX', '')}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
+    # TODO: sanitize project title
     return ldap_group_name
 
 

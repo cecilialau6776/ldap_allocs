@@ -27,7 +27,6 @@ def alloc_remove_user(sender, **kwargs):
     if ldap_group_name is None:
         return
     ldap_sam = LDAPModify()
-    logger.debug(f"next_gid {ldap_sam.get_next_gid()}")
     ldap_sam.remove_user_from_group(ldap_group_name, allocation_user.user.username)
 
 
@@ -42,9 +41,7 @@ def alloc_activate_user(sender, **kwargs):
     ldap_group_name = get_group_name(allocation_obj)
     if ldap_group_name is None:
         return
-
     ldap_sam = LDAPModify()
-    logger.debug(ldap_sam.get_next_gid())
     ldap_sam.add_user_to_group(ldap_group_name, allocation_user.user.username)
 
 
