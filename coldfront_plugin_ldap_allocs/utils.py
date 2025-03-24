@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_group_name(allocation_obj):
-    ldap_group_name = allocation_obj.resources.all()[0].get_attribute("ldap-group-name")
+    ldap_group_name = allocation_obj.get_attribute("ldap-group-name")
     if ldap_group_name is None:
+        logger.warn(f"No ldap-group-name attribute on allocation {allocation_obj.id}")
         return None
     ldap_group_name = f"{import_from_settings('LDAP_ALLOCS_PREFIX', '')}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
     # TODO: sanitize project title
@@ -147,6 +148,8 @@ class LDAPModify:
         self.conn.search(**searchParameters)
         gid_list = [entry["gidNumber"] for entry in self.conn.entries]
         try:
-            return next((gid for gid in range(gid_min, gid_max + 1) if gid not in gid_list))
+            return next(
+                (gid for gid in range(gid_min, gid_max + 1) if gid not in gid_list)
+            )
         except StopIteration:
             return None
