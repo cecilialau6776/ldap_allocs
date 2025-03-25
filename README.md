@@ -14,23 +14,28 @@ Add the following to ColdFront's [local settings](https://coldfront.readthedocs.
 INSTALLED_APPS += ["coldfront_plugin_ldap_allocs"]
 ```
 
+You must also create a Allocation Attribute Type named `ldap-group-name` with attribute type `Text`. This can be done with the following command:
+```sh
+coldfront create_ldap_allocs_resources
+```
+
 Additionally, set the following options as applicable for your LDAP server:
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `LDAP_ALLOCS_SERVER_URI` | N/A | URI for the LDAP server, required |
-| `LDAP_ALLOCS_BASE` | N/A | Search base, required |
-| `LDAP_ALLOCS_BIND_DN` | `""` | Bind DN |
-| `LDAP_ALLOCS_BIND_PASSWORD` | `""` | Bind Password |
-| `LDAP_ALLOCS_CONNECT_TIMEOUT` | `2.5` | Time in seconds before the connection times out |
-| `LDAP_ALLOCS_USE_SSL` | `True` | Whether or not to use SSL |
-| `LDAP_ALLOCS_USE_TLS` | `False` | Whether or not to use TLS |
-| `LDAP_ALLOCS_PRIV_KEY_FILE` | `""` | Path to the private key file |
-| `LDAP_ALLOCS_CERT_FILE` | `""` | Path to the certificate file |
-| `LDAP_ALLOCS_CACERT_FILE` | `""` | Path to the CA certificate file |
-| `LDAP_ALLOCS_GID_MIN` | `65565` | Lower gid range for LDAP `posixGroup`s, inclusive |
-| `LDAP_ALLOCS_GID_MAX` | `4294967295` | Upper gid range for LDAP `posixGroup`s, inclusive |
-| `LDAP_ALLOCS_PREFIX` | `""` | A string added to the beginning of LDAP group names. For example, if the prefix is `"cf-"` and the resource's `ldap-group-name` is `"storage"`, the `cn` might look something like `cn=cf-storage-project_name-42` |
+| Option                        | Default      | Description                                                                                                                                                                                                        |
+|-------------------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `LDAP_ALLOCS_SERVER_URI`      | N/A          | URI for the LDAP server, required                                                                                                                                                                                  |
+| `LDAP_ALLOCS_BASE`            | N/A          | Search base, required                                                                                                                                                                                              |
+| `LDAP_ALLOCS_BIND_DN`         | `""`         | Bind DN                                                                                                                                                                                                            |
+| `LDAP_ALLOCS_BIND_PASSWORD`   | `""`         | Bind Password                                                                                                                                                                                                      |
+| `LDAP_ALLOCS_CONNECT_TIMEOUT` | `2.5`        | Time in seconds before the connection times out                                                                                                                                                                    |
+| `LDAP_ALLOCS_USE_SSL`         | `True`       | Whether or not to use SSL                                                                                                                                                                                          |
+| `LDAP_ALLOCS_USE_TLS`         | `False`      | Whether or not to use TLS                                                                                                                                                                                          |
+| `LDAP_ALLOCS_PRIV_KEY_FILE`   | `""`         | Path to the private key file                                                                                                                                                                                       |
+| `LDAP_ALLOCS_CERT_FILE`       | `""`         | Path to the certificate file                                                                                                                                                                                       |
+| `LDAP_ALLOCS_CACERT_FILE`     | `""`         | Path to the CA certificate file                                                                                                                                                                                    |
+| `LDAP_ALLOCS_GID_MIN`         | `65565`      | Lower gid range for LDAP `posixGroup`s, inclusive                                                                                                                                                                  |
+| `LDAP_ALLOCS_GID_MAX`         | `4294967295` | Upper gid range for LDAP `posixGroup`s, inclusive                                                                                                                                                                  |
+| `LDAP_ALLOCS_PREFIX`          | `""`         | A string added to the beginning of LDAP group names. For example, if the prefix is `"cf-"` and the resource's `ldap-group-name` is `"storage"`, the `cn` might look something like `cn=cf-storage-project_name-42` |
 
 This plugin also provides a `remove_from_allocation` function that will remove users from an allocation. This can be in ColdFront's `ALLOCATION_FUNCS_ON_EXPIRE` setting to remove users from allocations when they expire.
 
