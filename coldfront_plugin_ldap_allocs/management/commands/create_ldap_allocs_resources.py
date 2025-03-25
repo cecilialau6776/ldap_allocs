@@ -13,5 +13,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         text_at = AttributeType.objects.get(name="Text")
         AllocationAttributeType.objects.get_or_create(
-            attribute_type=at, name="ldap-group-name"
+            attribute_type=text_at, name="ldap-group-name"
         )
