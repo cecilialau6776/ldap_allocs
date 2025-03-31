@@ -15,3 +15,6 @@ class Command(BaseCommand):
         AllocationAttributeType.objects.get_or_create(
             attribute_type=text_at, name="ldap-group-name"
         )
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=text_at, name="ldap-group-cn"
+        )

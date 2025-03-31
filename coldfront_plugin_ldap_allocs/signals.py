@@ -1,15 +1,19 @@
 import logging
 
-from django.dispatch import receiver
-from django.shortcuts import get_object_or_404
-
-from coldfront.core.allocation.models import Allocation, AllocationUser
-from coldfront.core.utils.common import import_from_settings
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+    AllocationUser,
+)
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_activate_user,
     allocation_remove_user,
 )
+from coldfront.core.utils.common import import_from_settings
+from django.dispatch import receiver
+from django.shortcuts import get_object_or_404
 
 from coldfront_plugin_ldap_allocs.utils import LDAPModify, get_group_name
 
@@ -65,12 +69,12 @@ def alloc_activate(sender, **kwargs):
     allocation_obj = get_object_or_404(Allocation, pk=allocation_id)
 
     # each project will only be able to have one group for each allocation resource type
-    ldap_group_name = get_group_name(allocation_obj)
-    if ldap_group_name is None:
+    ldap_group_cn = get_group_name(allocation_obj)
+    if ldap_group_cn is None:
         return
 
     ldap_sam = LDAPModify()
-    groups = ldap_sam.search_a_group(ldap_group_name, objectClass="groups")
+    groups = ldap_sam.search_a_group(ldap_group_cn, objectClass="groups")
     if len(groups) == 0:
         # Check gid is within range
         gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
@@ -81,11 +85,19 @@ def alloc_activate(sender, **kwargs):
             if gid is None:
                 logger.critical("No more gids available in range")
         ldap_sam.create_group(
-            ldap_group_name,
+            ldap_group_cn,
             "posixGroup",
             {"gidNumber": gid},
         )
-    groups = ldap_sam.search_a_group(ldap_group_name, objectClass="groups")
+    groups = ldap_sam.search_a_group(ldap_group_cn, objectClass="groups")
     if len(groups) == 0:
-        logger.critical(f"Failed to create group {ldap_group_name}")
+        logger.critical(f"Failed to create group {ldap_group_cn}")
         return
+
+    # create allocation attribute for the group cn
+    aat_group_cn = AllocationAttributeType.objects.get(name="ldap-group-cn")
+    AllocationAttribute.objects.get_or_create(
+        allocation_attribute_type=aat_group_cn,
+        allocation=allocation_obj,
+        value=ldap_group_cn,
+    )
