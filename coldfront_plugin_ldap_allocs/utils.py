@@ -1,12 +1,10 @@
 import logging
 
 import ldap.filter
-
-from django.shortcuts import get_object_or_404
-
-from coldfront.core.utils.common import import_from_settings
 from coldfront.core.allocation.models import Allocation
-from ldap3 import Connection, Server, Tls, LDIF, SASL, MODIFY_ADD, MODIFY_DELETE
+from coldfront.core.utils.common import import_from_settings
+from django.shortcuts import get_object_or_404
+from ldap3 import LDIF, MODIFY_ADD, MODIFY_DELETE, SASL, Connection, Server, Tls
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +129,19 @@ class LDAPModify:
         self.conn_ldif.add(**add_params)
         self.conn.add(**add_params)
         logger.debug(f"Create group response: {self.conn.result}")
+
+    def get_group_gid(self, group_cn) -> int:
+        filter = ldap.filter.filter_format("(cn=%s)", [group_name])
+        size_limit = 1
+        search_base = self.LDAP_BASE_DN
+        searchParameters = {
+            "search_base": search_base,
+            "search_filter": filter,
+            "size_limit": size_limit,
+            "attributes": "gidNumber",
+        }
+        self.conn.search(**searchParameters)
+        return self.conn.entries[0]["gidNumber"]
 
     def get_next_gid(self):
         gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 65565)
