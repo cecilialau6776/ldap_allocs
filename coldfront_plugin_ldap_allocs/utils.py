@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List, Optional
 
 import ldap.filter
 from coldfront.core.allocation.models import Allocation
@@ -7,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from ldap3 import LDIF, MODIFY_ADD, MODIFY_DELETE, SASL, Connection, Server, Tls
 
 logger = logging.getLogger(__name__)
+LDAP_ALLOCS_PREFIX = import_from_settings("LDAP_ALLOCS_PREFIX", "")
 
 
 def get_group_name(allocation_obj):
@@ -14,7 +16,7 @@ def get_group_name(allocation_obj):
     if ldap_group_name is None:
         logger.warn(f"No ldap-group-name attribute on allocation {allocation_obj.id}")
         return None
-    ldap_group_name = f"{import_from_settings('LDAP_ALLOCS_PREFIX', '')}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
+    ldap_group_name = f"{LDAP_ALLOCS_PREFIX}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
     # TODO: sanitize project title
     return ldap_group_name
 
@@ -130,17 +132,23 @@ class LDAPModify:
         self.conn.add(**add_params)
         logger.debug(f"Create group response: {self.conn.result}")
 
-    def get_group_gid(self, group_cn) -> int:
-        filter = ldap.filter.filter_format("(cn=%s)", [group_name])
-        size_limit = 1
+    def get_group_gids(self, group_cns: List[str]) -> Optional[Dict[str, int]]:
+        if len(group_cns) == 0:
+            return
+        filter_base = f"(|{'(cn=%s)' * len(group_cns)})"
+        filter = ldap.filter.filter_format(filter_base, group_cns)
+        size_limit = len(group_cns)
         search_base = self.LDAP_BASE_DN
         searchParameters = {
             "search_base": search_base,
             "search_filter": filter,
             "size_limit": size_limit,
-            "attributes": "gidNumber",
+            "attributes": ["gidNumber", "cn"],
         }
         self.conn.search(**searchParameters)
+        return self.conn.entries
+
+    def get_group_gid(self, group_cn) -> int:
         return self.conn.entries[0]["gidNumber"]
 
     def get_next_gid(self):
