@@ -8,6 +8,10 @@ from django.shortcuts import get_object_or_404
 from ldap3 import LDIF, MODIFY_ADD, MODIFY_DELETE, SASL, Connection, Server, Tls
 
 logger = logging.getLogger(__name__)
+LDAP_GROUP_NAME_FORMAT = import_from_settings(
+    "LDAP_ALLOCS_GROUP_NAME_FORMAT",
+    "{LDAP_ALLOCS_PREFIX}{ldap_group_name}-{allocation.project.pk}",
+)
 LDAP_ALLOCS_PREFIX = import_from_settings("LDAP_ALLOCS_PREFIX", "")
 
 
@@ -16,7 +20,11 @@ def get_group_name(allocation_obj):
     if ldap_group_name is None:
         logger.warn(f"No ldap-group-name attribute on allocation {allocation_obj.id}")
         return None
-    ldap_group_name = f"{LDAP_ALLOCS_PREFIX}{ldap_group_name}-{allocation_obj.project.title}-{allocation_obj.project.pk}"
+    ldap_group_name = LDAP_GROUP_NAME_FORMAT.format(
+        LDAP_ALLOCS_PREFIX=LDAP_ALLOCS_PREFIX,
+        ldap_group_name=ldap_group_name,
+        allocation=allocation_obj,
+    )
     # TODO: sanitize project title
     return ldap_group_name
 
