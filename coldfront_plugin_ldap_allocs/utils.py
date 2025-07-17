@@ -6,6 +6,7 @@ from coldfront.core.allocation.models import Allocation
 from coldfront.core.utils.common import import_from_settings
 from django.shortcuts import get_object_or_404
 from ldap3 import LDIF, MODIFY_ADD, MODIFY_DELETE, SASL, Connection, Server, Tls
+import ldap3.core.results as LDAP
 
 logger = logging.getLogger(__name__)
 LDAP_GROUP_NAME_FORMAT = import_from_settings(
@@ -138,6 +139,9 @@ class LDAPModify:
         add_params["attributes"].update(attrs)
         self.conn_ldif.add(**add_params)
         self.conn.add(**add_params)
+        if self.conn.result["result"] != LDAP.RESULT_SUCCESS:
+            logger.warn(f"Create group did not succeed: {self.conn.result}")
+
         logger.debug(f"Create group response: {self.conn.result}")
 
     def get_group_gids(self, group_cns: List[str]) -> Optional[Dict[str, int]]:

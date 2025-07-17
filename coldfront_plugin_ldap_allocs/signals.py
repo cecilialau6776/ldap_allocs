@@ -16,6 +16,7 @@ from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 
 from coldfront_plugin_ldap_allocs.utils import LDAPModify, get_group_name
+import ldap3.core.results as LDAP
 
 logger = logging.getLogger(__name__)
 
@@ -89,10 +90,20 @@ def alloc_activate(sender, **kwargs):
             "posixGroup",
             {"gidNumber": gid},
         )
-    groups = ldap_sam.search_a_group(ldap_group_cn, objectClass="groups")
-    if len(groups) == 0:
+    if ldap_sam.conn.result["result"] == LDAP.RESULT_CONSTRAINT_VIOLATION:
+        logger.warn("Trying again with a different gid...")
+        # if we get a constraint violation, try again with a different GID
+        gid = LDAPModify().get_next_gid()
+        ldap_sam.create_group(
+            ldap_group_cn,
+            "posixGroup",
+            {"gidNumber": gid},
+        )
+    if ldap_sam.conn.result["result"] != LDAP.RESULT_SUCCESS:
         logger.critical(f"Failed to create group {ldap_group_cn}")
         return
+
+    logger.info(f"Successfully created group {ldap_group_cn} with gid {gid}")
 
     # create allocation attribute for the group cn
     aat_group_cn = AllocationAttributeType.objects.get(name="ldap-group-cn")
