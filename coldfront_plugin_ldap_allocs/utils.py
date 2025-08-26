@@ -126,6 +126,26 @@ class LDAPModify:
             f"Remove {username} from {group_name} response: {self.conn.result}"
         )
 
+    def get_group_by_gid(self, gid, objectClass=None):
+        size_limit = 1
+        filter = ldap.filter.filter_format("(gid=%d)", [gid])
+        search_base = self.LDAP_BASE_DN
+        if objectClass is not None:
+            search_base = f"ou={objectClass},{search_base}"
+        searchParameters = {
+            "search_base": search_base,
+            "search_filter": filter,
+            "size_limit": size_limit,
+        }
+        logger.debug(f"Group search params: {searchParameters}")
+
+        self.conn.search(**searchParameters)
+
+        for entry in self.conn.entries:
+            group = entry
+
+        return group
+
     def create_group(self, group_name, objectClass, attrs: dict):
         # self.conn_ldif.add(
         add_params = {

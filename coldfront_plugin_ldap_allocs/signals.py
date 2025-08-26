@@ -77,7 +77,7 @@ def alloc_activate(sender, **kwargs):
     ldap_sam = LDAPModify()
     groups = ldap_sam.search_a_group(ldap_group_cn, objectClass="groups")
     if len(groups) == 0:
-        # Check gid is within range
+        # Check gid is within range or taken
         gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
         gid_max = import_from_settings("LDAP_ALLOCS_GID_MAX", 2**32 - 1)
         gid = gid_min + allocation_id

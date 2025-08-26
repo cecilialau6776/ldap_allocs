@@ -66,7 +66,7 @@ LDAP_ALLOCS_USE_SSL = True
 ```
 
 ## Usage
-Activating an allocation with the `ldap_group_cn` attribute will create a `posixGroup` in LDAP, and group membership is updated when the allocation is active and allocation users are added/removed.
+Activating an allocation with the `ldap-group-name` attribute will create a `posixGroup` in LDAP, and group membership is updated when the allocation is active and allocation users are added/removed.
 
 ## Details
 ### GID Range
