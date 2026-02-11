@@ -76,6 +76,11 @@ def alloc_activate(sender, **kwargs):
 
     ldap_sam = LDAPModify()
     groups = ldap_sam.search_a_group(ldap_group_cn, objectClass="groups")
+
+    if len(groups) > 0:
+        logger.info(f"Group {ldap_group_cn} already exists")
+        return
+
     if len(groups) == 0:
         # Check gid is within range or taken
         gid_min = import_from_settings("LDAP_ALLOCS_GID_MIN", 0)
@@ -91,7 +96,7 @@ def alloc_activate(sender, **kwargs):
             {"gidNumber": gid},
         )
     if ldap_sam.conn.result["result"] == LDAP.RESULT_CONSTRAINT_VIOLATION:
-        logger.warn("Trying again with a different gid...")
+        logger.warning("Trying again with a different gid...")
         # if we get a constraint violation, try again with a different GID
         gid = LDAPModify().get_next_gid()
         ldap_sam.create_group(
